@@ -92,18 +92,6 @@ Sends a text prompt to the n8n agent and receives a status message.
 }
 ```
 
-### `/api/n8n-answer` (POST)
-Webhook endpoint for n8n to send async audio responses (uses WebSocket broadcast).
-
-**Request:**
-```json
-{
-  "audio": "base64-encoded-audio" 
-  // OR
-  "audioUrl": "https://example.com/audio.mp3"
-}
-```
-
 ## Troubleshooting
 
 ### "Not a news topic"
