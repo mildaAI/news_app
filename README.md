@@ -10,21 +10,19 @@ A real-time voice-based application that integrates with n8n to trigger newslett
   - "Newsletter will be sent soon" (Success)
   - "Not a news topic" (Validation failure)
   - "Something went wrong" (Error handling)
-- 🔊 **Audio Broadcasting**: Supports receiving and playing async audio updates via WebSocket.
 - 📱 **Responsive UI**: Clean, modern chat interface with loading states.
 
 ## Tech Stack
 
 - **Backend**: Node.js with Express
 - **Frontend**: Vanilla JavaScript, HTML, CSS
-- **WebSocket**: Real-time communication for async updates
 - **Integration**: n8n webhook-based AI agent
 
 ## Project Structure
 
 ```
 voice_app/
-├── server.js           # Express server with WebSocket support
+├── server.js           # Express server
 ├── package.json        # Dependencies and scripts
 ├── public/
 │   ├── index.html      # Main HTML interface
@@ -69,7 +67,6 @@ voice_app/
 4. **Receive Feedback**:
    - If valid: You'll see "Newsletter will be sent soon".
    - If invalid: You'll see "Not a news topic".
-5. **Async Updates**: If the n8n workflow generates an audio summary later, it will be played automatically via WebSocket.
 
 ## API Endpoints
 

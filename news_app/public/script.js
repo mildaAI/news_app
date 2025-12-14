@@ -1,35 +1,5 @@
 const recordBtn = document.getElementById('record-btn');
 const chatBox = document.getElementById('chat-box');
-let currentAudio = null;
-
-// --- WebSocket Setup ---
-const socket = new WebSocket(`ws://${window.location.host}`);
-
-socket.onopen = () => {
-    console.log('WebSocket connection established');
-};
-
-socket.onmessage = (event) => {
-    const message = JSON.parse(event.data);
-    if (message.type === 'ai-answer-audio') {
-        // Remove the "thinking" message before adding the real answer
-        const thinkingMessage = document.getElementById('thinking-message');
-        if (thinkingMessage) thinkingMessage.remove();
-
-        console.log('Received audio response');
-        playAudio(message.data, message.isBase64);
-    }
-};
-
-socket.onclose = () => {
-    console.log('WebSocket connection closed');
-    addMessageToChat('Connection lost. Please refresh the page.', 'ai');
-};
-
-socket.onerror = (error) => {
-    console.error('WebSocket error:', error);
-    addMessageToChat('An error occurred with the connection.', 'ai');
-};
 
 // --- Speech Recognition Setup ---
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -71,19 +41,6 @@ if (SpeechRecognition) {
 }
 
 recordBtn.addEventListener('click', () => {
-    // Stop any currently playing audio
-    if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-        currentAudio = null;
-    }
-    
-    // If the AI is currently speaking, stop it.
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-        return; // Exit the function after stopping speech
-    }
-
     // If not recording, start recognition.
     if (recognition && !recordBtn.classList.contains('is-recording')) {        
         recognition.start();
@@ -140,11 +97,6 @@ async function sendPromptToServer(text) {
             addMessageToChat(data.message, 'ai');
         }
 
-        // Play the audio response
-        if (data.audio) {
-            playAudio(data.audio, true); // true indicates it's base64
-        }
-
     } catch (error) {
         console.error('Error sending prompt to server:', error);
         spinner.classList.add('hidden');
@@ -154,53 +106,3 @@ async function sendPromptToServer(text) {
     }
 }
 
-function playAudio(audioData, isBase64) {
-    try {
-        let audioUrl;
-        
-        if (isBase64) {
-            // Create a data URL from base64
-            audioUrl = 'data:audio/mpeg;base64,' + audioData;
-        } else {
-            // Use the URL directly
-            audioUrl = audioData;
-        }
-        
-        // Stop any currently playing audio
-        if (currentAudio) {
-            currentAudio.pause();
-            currentAudio.currentTime = 0;
-        }
-        
-        // Create and play audio element
-        const audio = new Audio();
-        audio.src = audioUrl;
-        currentAudio = audio; // Store reference to stop it later
-        
-        audio.onerror = (e) => {
-            console.error('Audio playback error:', e);
-            addMessageToChat('Could not play audio response.', 'ai');
-        };
-        
-        audio.play().catch(error => {
-            console.error('Error playing audio:', error);
-            addMessageToChat('Could not play audio response.', 'ai');
-        });
-    } catch (error) {
-        console.error('Error processing audio:', error);
-        addMessageToChat('Could not play audio response.', 'ai');
-    }
-}
-
-function speakText(text) {
-    if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.onerror = (event) => {
-            console.error('Speech synthesis error:', event.error);
-        };
-        window.speechSynthesis.speak(utterance);
-    } else {
-        console.error('Speech Synthesis not supported in this browser.');
-    }
-}

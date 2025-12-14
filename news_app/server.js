@@ -1,6 +1,4 @@
 const express = require('express');
-const http = require('http');
-const { WebSocketServer } = require('ws');
 const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
@@ -16,26 +14,6 @@ app.use(express.static(path.join(__dirname, 'public')));
  */
 app.get('/', (req, res) => {
   res.send('Server is running. If you see this, check that your `public` folder contains index.html.');
-});
-
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
-
-// Store all active WebSocket clients in a Set for efficient management.
-const clients = new Set();
-
-wss.on('connection', (ws) => {
-    console.log('Client connected to WebSocket');
-    clients.add(ws);
-
-    ws.on('close', () => {
-        console.log('Client disconnected');
-        clients.delete(ws);
-    });
-
-    ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
-    });
 });
 
 // IMPORTANT: Replace with your actual n8n webhook URL
@@ -105,4 +83,4 @@ app.post('/api/prompt', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
